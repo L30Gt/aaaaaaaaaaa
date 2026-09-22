@@ -13,16 +13,16 @@ from controllers import CarroController
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("blue")
 
-COR_FUNDO = "#09090B"         
-COR_MENU = "#18181B"          
-COR_BOTAO_ATIVO = "#2563EB"   
-COR_HOVER_MENU = "#27272A"    
+COR_FUNDO = "#09090B"
+COR_MENU = "#18181B"
+COR_BOTAO_ATIVO = "#2563EB"
+COR_HOVER_MENU = "#27272A"
 
 class GLVApp(ctk.CTk):
     def __init__(self):
         super().__init__()
         self.title("Sistema de Gestão Corporativa - TNE / GLV Táxi")
-        self.geometry("1280x760") 
+        self.geometry("1280x760")
         self.configure(fg_color=COR_FUNDO)
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=1)
@@ -33,20 +33,20 @@ class GLVApp(ctk.CTk):
         self.botoes_menu = {}
 
         self.criar_menu_lateral()
-        self.main_frame = ctk.CTkFrame(self, corner_radius=12, fg_color="#131316") 
+        self.main_frame = ctk.CTkFrame(self, corner_radius=12, fg_color="#131316")
         self.main_frame.grid(row=0, column=1, padx=20, pady=20, sticky="nsew")
-        
-        self.carregar_tela("tela_dashboard")
+
+        self.carregar_tela("tela_motoristas")
         self.atualizar_sino()
 
     def criar_menu_lateral(self):
         self.sidebar = ctk.CTkFrame(self, width=280, corner_radius=0, fg_color=COR_MENU)
         self.sidebar.grid(row=0, column=0, sticky="nsew")
 
-        self.sidebar.grid_rowconfigure(9, weight=1) 
+        self.sidebar.grid_rowconfigure(9, weight=1)
 
         caminho_logo = "logo.png" if os.path.exists("logo.png") else "logo.jpg" if os.path.exists("logo.jpg") else None
-        
+
         if caminho_logo:
             try:
                 img_original = Image.open(caminho_logo)
@@ -56,24 +56,25 @@ class GLVApp(ctk.CTk):
                 ctk.CTkLabel(self.sidebar, text="GLV TÁXI", font=self.fonte_titulo, text_color="#FFFFFF").grid(row=0, column=0, padx=20, pady=(35, 10))
         else:
             ctk.CTkLabel(self.sidebar, text="GLV TÁXI", font=self.fonte_titulo, text_color="#FFFFFF").grid(row=0, column=0, padx=20, pady=(35, 10))
-        
+
         self.btn_sino = ctk.CTkButton(self.sidebar, text="🔔 Alertas (0)", font=self.fonte_menu, fg_color="#3F3F46", hover_color="#52525B", command=self.mostrar_alertas)
         self.btn_sino.grid(row=1, column=0, padx=20, pady=(10, 20), sticky="ew")
-        
+
         abas = [
-            ("📊  Painel Executivo", "tela_dashboard"), 
-            ("🚗  Frota e Vendas", "tela_frota"), 
-            ("👥  Motoristas", "tela_motoristas"), 
-            ("🔑  Locações", "tela_locacoes"), 
-            ("📄  Alvarás Oficiais", "tela_alvaras"), 
+            ("📊  Painel Executivo", "tela_dashboard"),
+            ("🚗  Frota e Vendas", "tela_frota"),
+            ("👥  Motoristas", "tela_motoristas"),
+            ("🔑  Locações", "tela_locacoes"),
+            ("📄  Alvarás Oficiais", "tela_alvaras"),
             ("💰  Fluxo de Caixa", "tela_caixa"),
             ("🛑  Multas e Débitos", "tela_multas")
         ]
-        
+
         for idx, (txt, modulo) in enumerate(abas):
             btn = ctk.CTkButton(
                 self.sidebar, text=txt, font=self.fonte_menu, anchor="w", height=45, corner_radius=8,
                 fg_color="transparent", hover_color=COR_HOVER_MENU, text_color="#A1A1AA",
+                state="normal" if modulo == "tela_motoristas" else "disabled",
                 command=lambda m=modulo: self.carregar_tela(m)
             )
             btn.grid(row=idx+2, column=0, padx=15, pady=6, sticky="ew")
@@ -82,6 +83,7 @@ class GLVApp(ctk.CTk):
         btn_config = ctk.CTkButton(
             self.sidebar, text="⚙️  Configurações", font=self.fonte_menu, anchor="w", height=45, corner_radius=8,
             fg_color="transparent", hover_color=COR_HOVER_MENU, text_color="#A1A1AA",
+            state="disabled",
             command=lambda: self.carregar_tela("tela_configuracoes")
         )
 
@@ -102,12 +104,12 @@ class GLVApp(ctk.CTk):
         win.geometry("480x450")
         win.attributes("-topmost", True)
         win.configure(fg_color=COR_FUNDO)
-        
+
         ctk.CTkLabel(win, text="Pendências da Frota", font=self.fonte_titulo).pack(pady=20)
-        
+
         sc = ctk.CTkScrollableFrame(win, fg_color="transparent")
         sc.pack(fill="both", expand=True, padx=15, pady=10)
-        
+
         if not alertas:
             ctk.CTkLabel(sc, text="Nenhum alerta pendente! Frota e documentos em dia.", text_color="#10B981", font=ctk.CTkFont(size=14)).pack(pady=20)
         else:
@@ -128,7 +130,7 @@ class GLVApp(ctk.CTk):
 
         try:
             modulo = importlib.import_module(nome_modulo)
-            importlib.reload(modulo) 
+            importlib.reload(modulo)
             modulo.renderizar(self.main_frame, self.controller, self)
         except ModuleNotFoundError:
             ctk.CTkLabel(self.main_frame, text=f"⚠️ O Módulo '{nome_modulo}' falhou.", text_color="#EF4444", font=self.fonte_titulo).pack(pady=100)
